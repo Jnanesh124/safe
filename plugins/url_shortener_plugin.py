@@ -1,13 +1,24 @@
+import os
+import aiohttp
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, InlineQueryResultArticle, InputTextMessageContent
-import os
+
+# Load environment variables
+BLOGGER_API_URL = os.environ.get("BLOGGER_API_URL")
 
 # Manual URL Shortener Function
 async def manual_shortener(long_url):
-    # This is a placeholder. Replace it with actual URL shortening logic or a static response.
-    # For instance, you can create a mapping of long URLs to short URLs if you have a static set.
-    short_url = f"https://short.url/{long_url.split('/')[-1]}"  # Example format
-    return short_url
+    if BLOGGER_API_URL:
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(BLOGGER_API_URL, json={"longUrl": long_url}) as response:
+                    data = await response.json()
+                    short_url = data.get("shortUrl", long_url)  # Adjust according to your API response
+                    return short_url
+        except Exception as e:
+            print(f"Error shortening URL: {e}")
+            return long_url
+    return long_url
 
 # Inline Keyboard Button
 BUTTONS = InlineKeyboardMarkup(
