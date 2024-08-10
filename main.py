@@ -2,16 +2,20 @@ import os
 from pyrogram import Client
 from dotenv import load_dotenv
 
-
+# Load environment variables from a .env file
 load_dotenv()
 
-bot_token = os.environ["BOT_TOKEN"]
-api_id = int(os.environ["API_ID"])
-api_hash = os.environ["API_HASH"]
+# Retrieve environment variables
+bot_token = os.environ.get("BOT_TOKEN")
+api_id = int(os.environ.get("API_ID"))
+api_hash = os.environ.get("API_HASH")
+
+# Directory where plugins are stored
 plugins = dict(
     root="plugins"
 )
 
+# Initialize the Pyrogram Client
 Bot = Client(
     "URL-Shortner-Bot",
     bot_token=bot_token,
@@ -22,4 +26,6 @@ Bot = Client(
     sleep_threshold=10
 )
 
-Bot.run()
+# Start the bot
+if __name__ == "__main__":
+    Bot.run()
