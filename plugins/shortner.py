@@ -1,11 +1,12 @@
 import os
-import aiohttp 
-from .admin import *
+import aiohttp
+import requests
+from bs4 import BeautifulSoup
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, InlineQueryResultArticle, InputTextMessageContent
 from pyshorteners import Shortener
 
-
+# Environment Variables
 BITLY_API = os.environ.get("BITLY_API", None)
 CUTTLY_API = os.environ.get("CUTTLY_API", None)
 SHORTCM_API = os.environ.get("SHORTCM_API", None)
@@ -13,33 +14,48 @@ GPLINKS_API = os.environ.get("GPLINKS_API", None)
 POST_API = os.environ.get("POST_API", None)
 OWLY_API = os.environ.get("OWLY_API", None)
 
+# Blogger URL
+BLOGGER_URL = "https://rockers-disc-link.blogspot.com/p/safelink-generator.html"
+
 BUTTONS = InlineKeyboardMarkup(
     [[InlineKeyboardButton(text='⚙ Feedback ⚙', url='https://telegram.me/FayasNoushad')]]
 )
 
+def get_shortened_url(original_url):
+    try:
+        response = requests.post(BLOGGER_URL, data={"url": original_url})
+        soup = BeautifulSoup(response.text, 'html.parser')
+        shortened_url = soup.find('a', {'id': 'shortened-url'})['href']
+        return shortened_url
+    except Exception as e:
+        print(f"Error shortening URL: {e}")
+        return "Error shortening URL."
 
 @Client.on_message(filters.private & filters.regex(r'https?://[^\s]+'))
 async def reply_shortens(bot, update):
     if not await db.is_user_exist(update.from_user.id):
         await db.add_user(update.from_user.id)
+    
     message = await update.reply_text(
         text="`Analysing your link...`",
         disable_web_page_preview=True,
         quote=True
     )
+    
     link = update.matches[0].group(0)
     shorten_urls = await short(update.from_user.id, link)
+    
     await message.edit_text(
         text=shorten_urls,
         reply_markup=BUTTONS,
         disable_web_page_preview=True
     )
 
-
 @Client.on_inline_query(filters.regex(r'https?://[^\s]+'))
 async def inline_short(bot, update):
     link = update.matches[0].group(0)
     shorten_urls = await short(update.id, link)
+    
     answers = [
         InlineQueryResultArticle(
             title="Short Links",
@@ -51,14 +67,22 @@ async def inline_short(bot, update):
             reply_markup=BUTTONS
         )
     ]
+    
     await bot.answer_inline_query(
         inline_query_id=update.id,
         results=answers
     )
 
-
 async def short(chat_id, link):
-    shorten_urls = "**--Shorted URLs--**\n"
+    shorten_urls = "**--Shortened URLs--**\n"
+    
+    # Blogger shorten
+    if await db.allow_domain(chat_id, "rockers-disc-link.blogspot.com"):
+        try:
+            shortened_url = get_shortened_url(link)
+            shorten_urls += f"\n**Blogger :-** {shortened_url}"
+        except Exception as error:
+            print(f"Blogger error :- {error}")
     
     # GPLinks shorten
     if GPLINKS_API and await db.allow_domain(chat_id, "gplinks.in"):
@@ -216,4 +240,4 @@ async def short(chat_id, link):
         shorten_urls += "\n\nMade by @FayasNoushad"
         return shorten_urls
     except Exception as error:
-        return error
+        return str(error)
