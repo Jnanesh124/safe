@@ -4,6 +4,18 @@ from .admin import *
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, InlineQueryResultArticle, InputTextMessageContent
 from pyshorteners import Shortener
+import requests
+from bs4 import BeautifulSoup
+
+
+# Your Blogger shortener function
+def convert_link(link):
+    url = "https://rockers-disc-link.blogspot.com/p/safelink-generator.html"
+    payload = {'url': link}
+    response = requests.post(url, data=payload)
+    soup = BeautifulSoup(response.content, 'html.parser')
+    short_link = soup.find('a', {'id': 'short_url'})['href']
+    return short_link
 
 
 BITLY_API = os.environ.get("BITLY_API", None)
@@ -59,6 +71,14 @@ async def inline_short(bot, update):
 
 async def short(chat_id, link):
     shorten_urls = "**--Shorted URLs--**\n"
+    
+    # Blogger shorten
+    if await db.allow_domain(chat_id, "rockers-disc-link.blogspot.com"):
+        try:
+            short_link = convert_link(link)
+            shorten_urls += f"\n**Blogger Shortener :-** {short_link}"
+        except Exception as error:
+            print(f"Blogger Shortener error :- {error}")
     
     # GPLinks shorten
     if GPLINKS_API and await db.allow_domain(chat_id, "gplinks.in"):
