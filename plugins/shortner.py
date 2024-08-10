@@ -1,11 +1,11 @@
 import os
-import aiohttp
+import aiohttp 
 from .admin import *
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, InlineQueryResultArticle, InputTextMessageContent
 from pyshorteners import Shortener
 
-# Environment variables for API keys
+
 BITLY_API = os.environ.get("BITLY_API", None)
 CUTTLY_API = os.environ.get("CUTTLY_API", None)
 SHORTCM_API = os.environ.get("SHORTCM_API", None)
@@ -16,6 +16,7 @@ OWLY_API = os.environ.get("OWLY_API", None)
 BUTTONS = InlineKeyboardMarkup(
     [[InlineKeyboardButton(text='⚙ Feedback ⚙', url='https://telegram.me/FayasNoushad')]]
 )
+
 
 @Client.on_message(filters.private & filters.regex(r'https?://[^\s]+'))
 async def reply_shortens(bot, update):
@@ -33,6 +34,7 @@ async def reply_shortens(bot, update):
         reply_markup=BUTTONS,
         disable_web_page_preview=True
     )
+
 
 @Client.on_inline_query(filters.regex(r'https?://[^\s]+'))
 async def inline_short(bot, update):
@@ -54,8 +56,9 @@ async def inline_short(bot, update):
         results=answers
     )
 
+
 async def short(chat_id, link):
-    shorten_urls = "**--Shortened URLs--**\n"
+    shorten_urls = "**--Shorted URLs--**\n"
     
     # GPLinks shorten
     if GPLINKS_API and await db.allow_domain(chat_id, "gplinks.in"):
@@ -177,15 +180,16 @@ async def short(chat_id, link):
             shorten_urls += f"\n**Short.cm :-** {url}"
         except Exception as error:
             print(f"Short.cm error :- {error}")
-
-    # Blogger Shortener
-    if await db.allow_domain(chat_id, "rockers-disc-link.blogspot.com"):
+    
+    # TinyURL.com shorten
+    if await db.allow_domain(chat_id, "tinyurl.com"):
         try:
-            short_link = convert_link(link)
-            shorten_urls += f"\n**Blogger Shortener :-** {short_link}"
+            s = Shortener()
+            url = s.tinyurl.short(link)
+            shorten_urls += f"\n**TinyURL.com :-** {url}"
         except Exception as error:
-            print(f"Blogger Shortener error :- {error}")
-
+            print(f"TinyURL.com error :- {error}")
+    
     # NullPointer shorten
     try:
         # 0x0.st shorten 
@@ -206,7 +210,7 @@ async def short(chat_id, link):
                 print(f"ttm.sh :- {error}")
     except Exception as error:
         print(f"NullPointer error :- {error}")
-
+    
     # Send the text
     try:
         shorten_urls += "\n\nMade by @FayasNoushad"
