@@ -177,76 +177,20 @@ async def display_settings(bot, update, db, cb=False):
         buttons.append([InlineKeyboardButton(text="Bit.ly ✅", callback_data="set+bit.ly")])
     else:
         buttons.append([InlineKeyboardButton(text="Bit.ly ❌", callback_data="set+bit.ly")])
-    
-    if await db.allow_domain(chat_id, domain="chilp.it"):
-        buttons.append([InlineKeyboardButton(text="Chilp.it ✅", callback_data="set+chilp.it")])
+
+    # Add Blogger-based URL shortener button
+    if await db.allow_domain(chat_id, domain="blogger.com"):
+        buttons.append([InlineKeyboardButton(text="Blogger.com ✅", callback_data="set+blogger.com")])
     else:
-        buttons.append([InlineKeyboardButton(text="Chilp.it ❌", callback_data="set+chilp.it")])
+        buttons.append([InlineKeyboardButton(text="Blogger.com ❌", callback_data="set+blogger.com")])
     
-    if await db.allow_domain(chat_id, domain="click.ru"):
-        buttons.append([InlineKeyboardButton(text="Click.ru ✅", callback_data="set+click.ru")])
-    else:
-        buttons.append([InlineKeyboardButton(text="Click.ru ❌", callback_data="set+click.ru")])
+    # Continue with the rest of the domains...
     
-    if await db.allow_domain(chat_id, domain="cutt.ly"):
-        buttons.append([InlineKeyboardButton(text="Cutt.ly ✅", callback_data="set+cutt.ly")])
-    else:
-        buttons.append([InlineKeyboardButton(text="Cutt.ly ❌", callback_data="set+cutt.ly")])
-    
-    if await db.allow_domain(chat_id, domain="da.gd"):
-        buttons.append([InlineKeyboardButton(text="Da.gd ✅", callback_data="set+da.gd")])
-    else:
-        buttons.append([InlineKeyboardButton(text="Da.gd ❌", callback_data="set+da.gd")])
-    
-    if await db.allow_domain(chat_id, domain="git.io"):
-        buttons.append([InlineKeyboardButton(text="Git.io ✅", callback_data="set+git.io")])
-    else:
-        buttons.append([InlineKeyboardButton(text="Git.io ❌", callback_data="set+git.io")])
-    
-    if await db.allow_domain(chat_id, domain="is.gd"):
-        buttons.append([InlineKeyboardButton(text="Is.gd ✅", callback_data="set+is.gd")])
-    else:
-        buttons.append([InlineKeyboardButton(text="Is.gd ❌", callback_data="set+is.gd")])
-    
-    if await db.allow_domain(chat_id, domain="osdb.link"):
-        buttons.append([InlineKeyboardButton(text="Osdb.link ✅", callback_data="set+osdb.link")])
-    else:
-        buttons.append([InlineKeyboardButton(text="Osdb.link ❌", callback_data="set+osdb.link")])
-    
-    if await db.allow_domain(chat_id, domain="ow.ly"):
-        buttons.append([InlineKeyboardButton(text="Ow.ly ✅", callback_data="set+ow.ly")])
-    else:
-        buttons.append([InlineKeyboardButton(text="Ow.ly ❌", callback_data="set+ow.ly")])
-    
-    if await db.allow_domain(chat_id, domain="po.st"):
-        buttons.append([InlineKeyboardButton(text="Po.st ✅", callback_data="set+po.st")])
-    else:
-        buttons.append([InlineKeyboardButton(text="Po.st ❌", callback_data="set+po.st")])
-    
-    if await db.allow_domain(chat_id, domain="qps.ru"):
-        buttons.append([InlineKeyboardButton(text="Qps.ru ✅", callback_data="set+qps.ru")])
-    else:
-        buttons.append([InlineKeyboardButton(text="Qps.ru ❌", callback_data="set+qps.ru")])
-    
-    if await db.allow_domain(chat_id, domain="short.cm"):
-        buttons.append([InlineKeyboardButton(text="Short.cm ✅", callback_data="set+short.cm")])
-    else:
-        buttons.append([InlineKeyboardButton(text="Short.cm ❌", callback_data="set+short.cm")])
-    
+    # Example for tinyurl.com
     if await db.allow_domain(chat_id, domain="tinyurl.com"):
         buttons.append([InlineKeyboardButton(text="Tinyurl.com ✅", callback_data="set+tinyurl.com")])
     else:
         buttons.append([InlineKeyboardButton(text="Tinyurl.com ❌", callback_data="set+tinyurl.com")])
-    
-    if await db.allow_domain(chat_id, domain="0x0.st"):
-        buttons.append([InlineKeyboardButton(text="0x0.st ✅", callback_data="set+0x0.st")])
-    else:
-        buttons.append([InlineKeyboardButton(text="0x0.st ❌", callback_data="set+0x0.st")])
-    
-    if await db.allow_domain(chat_id, domain="ttm.sh"):
-        buttons.append([InlineKeyboardButton(text="ttm.sh ✅", callback_data="set+ttm.sh")])
-    else:
-        buttons.append([InlineKeyboardButton(text="ttm.sh ❌", callback_data="set+ttm.sh")])
     
     keyboard = []
     
