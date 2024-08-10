@@ -1,23 +1,11 @@
 import os
-import aiohttp 
+import aiohttp
 from .admin import *
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, InlineQueryResultArticle, InputTextMessageContent
 from pyshorteners import Shortener
-import requests
-from bs4 import BeautifulSoup
 
-
-# Your Blogger shortener function
-def convert_link(link):
-    url = "https://rockers-disc-link.blogspot.com/p/safelink-generator.html"
-    payload = {'url': link}
-    response = requests.post(url, data=payload)
-    soup = BeautifulSoup(response.content, 'html.parser')
-    short_link = soup.find('a', {'id': 'short_url'})['href']
-    return short_link
-
-
+# Environment variables for API keys
 BITLY_API = os.environ.get("BITLY_API", None)
 CUTTLY_API = os.environ.get("CUTTLY_API", None)
 SHORTCM_API = os.environ.get("SHORTCM_API", None)
@@ -39,26 +27,12 @@ async def reply_shortens(bot, update):
         quote=True
     )
     link = update.matches[0].group(0)
-    
-    shorten_urls = ""
-    
-    # Check if Blogger domain is allowed and use convert_link
-    if await db.allow_domain(update.from_user.id, "rockers-disc-link.blogspot.com"):
-        try:
-            short_link = convert_link(link)
-            shorten_urls += f"\n**Blogger Shortener :-** {short_link}"
-        except Exception as error:
-            print(f"Blogger Shortener error :- {error}")
-
-    # Other shortenings
-    shorten_urls += await short(update.from_user.id, link)
-    
+    shorten_urls = await short(update.from_user.id, link)
     await message.edit_text(
         text=shorten_urls,
         reply_markup=BUTTONS,
         disable_web_page_preview=True
     )
-
 
 @Client.on_inline_query(filters.regex(r'https?://[^\s]+'))
 async def inline_short(bot, update):
@@ -80,17 +54,8 @@ async def inline_short(bot, update):
         results=answers
     )
 
-
 async def short(chat_id, link):
-    shorten_urls = "**--Shorted URLs--**\n"
-    
-    # Blogger shorten
-    if await db.allow_domain(chat_id, "rockers-disc-link.blogspot.com"):
-        try:
-            short_link = convert_link(link)
-            shorten_urls += f"\n**Blogger Shortener :-** {short_link}"
-        except Exception as error:
-            print(f"Blogger Shortener error :- {error}")
+    shorten_urls = "**--Shortened URLs--**\n"
     
     # GPLinks shorten
     if GPLINKS_API and await db.allow_domain(chat_id, "gplinks.in"):
@@ -212,16 +177,15 @@ async def short(chat_id, link):
             shorten_urls += f"\n**Short.cm :-** {url}"
         except Exception as error:
             print(f"Short.cm error :- {error}")
-    
-    # TinyURL.com shorten
-    if await db.allow_domain(chat_id, "tinyurl.com"):
+
+    # Blogger Shortener
+    if await db.allow_domain(chat_id, "rockers-disc-link.blogspot.com"):
         try:
-            s = Shortener()
-            url = s.tinyurl.short(link)
-            shorten_urls += f"\n**TinyURL.com :-** {url}"
+            short_link = convert_link(link)
+            shorten_urls += f"\n**Blogger Shortener :-** {short_link}"
         except Exception as error:
-            print(f"TinyURL.com error :- {error}")
-    
+            print(f"Blogger Shortener error :- {error}")
+
     # NullPointer shorten
     try:
         # 0x0.st shorten 
@@ -242,7 +206,7 @@ async def short(chat_id, link):
                 print(f"ttm.sh :- {error}")
     except Exception as error:
         print(f"NullPointer error :- {error}")
-    
+
     # Send the text
     try:
         shorten_urls += "\n\nMade by @FayasNoushad"
