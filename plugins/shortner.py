@@ -59,26 +59,6 @@ async def reply_shortens(bot, update):
         disable_web_page_preview=True
     )
 
-async def short(chat_id, link):
-    # Existing short function logic here
-    
-@Client.on_message(filters.private & filters.regex(r'https?://[^\s]+'))
-async def reply_shortens(bot, update):
-    if not await db.is_user_exist(update.from_user.id):
-        await db.add_user(update.from_user.id)
-    message = await update.reply_text(
-        text="`Analysing your link...`",
-        disable_web_page_preview=True,
-        quote=True
-    )
-    link = update.matches[0].group(0)
-    shorten_urls = await short(update.from_user.id, link)
-    await message.edit_text(
-        text=shorten_urls,
-        reply_markup=BUTTONS,
-        disable_web_page_preview=True
-    )
-
 
 @Client.on_inline_query(filters.regex(r'https?://[^\s]+'))
 async def inline_short(bot, update):
