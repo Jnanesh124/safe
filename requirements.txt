@@ -6,3 +6,5 @@ motor
 aiofiles
 dnspython
 python-dotenv
+requests
+beautifulsoup4
