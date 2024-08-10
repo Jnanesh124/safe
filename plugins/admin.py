@@ -9,15 +9,20 @@ import asyncio
 import datetime
 import motor.motor_asyncio
 import aiofiles
-import aiohttp
 from io import BytesIO
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.errors import FloodWait, InputUserDeactivated, UserIsBlocked, PeerIdInvalid, UserNotParticipant, UserBannedInChannel
 from pyrogram.errors.exceptions.bad_request_400 import PeerIdInvalid
 
+
 class Database:
-    def __init__(self, url=os.environ.get("DATABASE"), database_name="URLShortBot"):
+        
+    def __init__(
+        self,
+        url=os.environ.get("DATABASE"),
+        database_name="URLShortBot"
+    ):
         self._client = motor.motor_asyncio.AsyncIOMotorClient(url)
         self.db = self._client[database_name]
         self.col = self.db.users
@@ -42,9 +47,7 @@ class Database:
                 "short.cm": True,
                 "tinyurl.com": True,
                 "0x0.st": True,
-                "ttm.sh": True,
-                # Adding Blogger shortener
-                "rockers-disc-link.blogspot.com": True
+                "ttm.sh": True
             }
         }
         
@@ -90,34 +93,18 @@ class Database:
             {"$set": {"domains": domains}}
         )
 
+
 BOT_OWNER = int(os.environ.get("BOT_OWNER"))
 db = Database()
 
-BLOGGER_API_URL = os.environ.get("BLOGGER_API_URL")
-
-async def shorten_url_with_blogger(long_url):
-    if BLOGGER_API_URL:
-        try:
-            async with aiohttp.ClientSession() as session:
-                async with session.post(BLOGGER_API_URL, json={"longUrl": long_url}) as response:
-                    data = await response.json()
-                    short_url = data.get("shortUrl", long_url)  # Adjust according to your API response
-                    return short_url
-        except Exception as e:
-            print(f"Error shortening URL: {e}")
-            return long_url
-    return long_url
 
 async def send_msg(user_id, message):
     try:
-        # Shorten URLs in the message
-        if message.text:
-            message.text = await shorten_url_with_blogger(message.text)
         await message.copy(chat_id=user_id)
         return 200, None
     except FloodWait as e:
         await asyncio.sleep(e.x)
-        return await send_msg(user_id, message)
+        return send_msg(user_id, message)
     except InputUserDeactivated:
         return 400, f"{user_id} : deactivated\n"
     except UserIsBlocked:
@@ -126,6 +113,7 @@ async def send_msg(user_id, message):
         return 400, f"{user_id} : user id invalid\n"
     except Exception as e:
         return 500, f"{user_id} : {traceback.format_exc()}\n"
+
 
 @Client.on_message(filters.private & filters.command("broadcast") & filters.user(BOT_OWNER) & filters.reply, group=10)
 async def broadcast(bot, update):
@@ -142,10 +130,10 @@ async def broadcast(bot, update):
     done = 0
     failed = 0
     success = 0
-    broadcast_ids[broadcast_id] = dict(total=total_users, current=done, failed=failed, success=success)
+    broadcast_ids[broadcast_id] = dict(total = total_users, current = done, failed = failed, success = success)
     async with aiofiles.open('broadcast.txt', 'w') as broadcast_log_file:
         async for user in all_users:
-            sts, msg = await send_msg(user_id=int(user['id']), message=broadcast_msg)
+            sts, msg = await send_msg(user_id = int(user['id']), message = broadcast_msg)
             if msg is not None:
                 await broadcast_log_file.write(msg)
             if sts == 200:
@@ -158,10 +146,10 @@ async def broadcast(bot, update):
             if broadcast_ids.get(broadcast_id) is None:
                 break
             else:
-                broadcast_ids[broadcast_id].update(dict(current=done, failed=failed, success=success))
+                broadcast_ids[broadcast_id].update(dict(current = done, failed = failed, success = success))
     if broadcast_ids.get(broadcast_id):
         broadcast_ids.pop(broadcast_id)
-    completed_in = datetime.timedelta(seconds=int(time.time() - start_time))
+    completed_in = datetime.timedelta(seconds=int(time.time()-start_time))
     await asyncio.sleep(3)
     await out.delete()
     if failed == 0:
