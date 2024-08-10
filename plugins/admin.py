@@ -42,7 +42,9 @@ class Database:
                 "short.cm": True,
                 "tinyurl.com": True,
                 "0x0.st": True,
-                "ttm.sh": True
+                "ttm.sh": True,
+                # Adding Blogger shortener
+                "rockers-disc-link.blogspot.com": True
             }
         }
         
